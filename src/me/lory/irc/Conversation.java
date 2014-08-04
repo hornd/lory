@@ -31,8 +31,7 @@ public class Conversation implements IConversation {
 	@Override
 	public void send(EMessageType type, String contents) {
 		try {
-			IMessage msg = new Message.Builder().setMessage(contents)
-					.setMessageType(type).setTarget(this).build();
+			IMessage msg = new Message.Builder().setMessage(contents).setMessageType(type).setTarget(this).build();
 			this.dispatcher.sendMessage(msg);
 		} catch (MessageBuilderException exc) {
 			// TODO:

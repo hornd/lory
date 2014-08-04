@@ -13,7 +13,7 @@ public class TestServer {
 	public void isConnected() throws Exception {
 		IServerConnection con = new MockServerConnection();
 		IServer server = new Server(con);
-		
+
 		assertFalse("Expected disconnected server", server.isConnected());
 		server.connect();
 		assertTrue("Expected connected server", server.isConnected());

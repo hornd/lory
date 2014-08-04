@@ -18,19 +18,19 @@ import org.mockito.Mockito;
 public class MockServerConnection implements IServerConnection {
 
 	private volatile boolean isConnected;
-	
+
 	private BufferedReader ingress;
 	private PrintWriter egress;
-	
+
 	public MockServerConnection() {
 		this(new BufferedReader(Mockito.mock(BufferedReader.class)), Mockito.mock(PrintWriter.class));
 	}
-	
+
 	public MockServerConnection(BufferedReader ingress, PrintWriter egress) {
 		this.ingress = ingress;
 		this.egress = egress;
 	}
-	
+
 	@Override
 	public void connect() throws IOException, UnknownHostException {
 		this.isConnected = true;

@@ -57,9 +57,9 @@ public class IngressMessageParser {
 
 		String sender = this.getMessageSender(this.message);
 		String recipient = this.getMessageRecipient(this.message);
-		
+
 		String convoName = isChannel(recipient) ? recipient : sender;
-		
+
 		for (IConversation target : targets) {
 			if (target.getName().equals(convoName)) {
 				ret = target;
@@ -68,26 +68,26 @@ public class IngressMessageParser {
 
 		return ret;
 	}
-	
+
 	private boolean isChannel(String message) {
 		return message.startsWith("#");
 	}
-	
+
 	private String getMessageRecipient(String message) throws MessageParserException {
 		String[] split = this.message.split(" ");
 		if (split == null || split.length < 3) {
 			throw new MessageParserException();
 		}
-		
+
 		return split[2];
 	}
-	
+
 	private String getMessageSender(String message) throws MessageParserException {
 		String[] split = this.message.split(":");
 		if (split == null || split.length < 2) {
 			throw new MessageParserException();
 		}
-		
+
 		String[] convoNames = split[1].split("!");
 		if (convoNames == null || convoNames.length < 1) {
 			throw new MessageParserException();

@@ -34,16 +34,17 @@ public interface IServer extends IServerMessageDispatcher {
 	 * Returns true if connected, false otherwise.
 	 */
 	boolean isConnected();
-	
+
 	/**
-	 * Return the collection of conversations associated with
-	 * this server.
+	 * Return the collection of conversations associated with this server.
+	 * 
 	 * @return
 	 */
 	Collection<IConversation> getConversations();
-	
+
 	/**
 	 * Return the status conversation associated with this server.
+	 * 
 	 * @return
 	 */
 	IConversation getStatusConversation();

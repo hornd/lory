@@ -151,7 +151,7 @@ public class Server implements IServer {
 						String strMsg = parser.getMessage(type);
 						IMessage message = new Message.Builder().setMessageType(type).setTarget(target)
 								.setMessage(strMsg).build();
-						
+
 						target.queueReceived(message);
 					} catch (MessageParserException | MessageBuilderException e) {
 						Lory.LOG.log(Level.SEVERE, String.format("Unrecognized message! %s", rec));

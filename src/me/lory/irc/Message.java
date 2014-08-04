@@ -39,9 +39,7 @@ public class Message implements IMessage {
 		}
 
 		private boolean canBuild() {
-			return this.msg != null
-					&& (this.convo != null || !this.messageType
-							.isRequireTarget());
+			return this.msg != null && (this.convo != null || !this.messageType.isRequireTarget());
 		}
 	}
 
