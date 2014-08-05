@@ -56,6 +56,7 @@ public class Shell {
 	}
 
 	public void go() {
+		System.out.println("Lory cli");
 		try (Scanner s = new Scanner(System.in)) {
 			while (true) {
 				String n = s.nextLine();

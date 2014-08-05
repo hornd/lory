@@ -160,6 +160,7 @@ public class Server implements IServer {
 			}
 		}
 
+		@SuppressWarnings("unused")
 		public IConversation getConversationForIngressMsg(String msg) {
 			return Server.this.status;
 		}

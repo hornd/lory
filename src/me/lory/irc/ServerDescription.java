@@ -1,7 +1,5 @@
 package me.lory.irc;
 
-import java.util.IllegalFormatConversionException;
-import java.util.IllegalFormatException;
 
 /**
  * Describes a server.

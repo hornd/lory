@@ -1,10 +1,7 @@
 package me.lory.irc;
 
-import java.util.Scanner;
 import java.util.logging.Logger;
 
-import me.lory.EMessageType;
-import me.lory.IMessage;
 import me.lory.irc.cli.Shell;
 
 public class Lory {
@@ -14,26 +11,36 @@ public class Lory {
 		private String help;
 		private Runnable action;
 
+		private Option(String name, Runnable action) {
+			this(name, null, action);
+		}
+
 		private Option(String name, String help, Runnable action) {
 			this.name = name;
 			this.help = help;
 			this.action = action;
 		}
 
-		public void executeAction() {
+		private void executeAction() {
 			action.run();
 		}
+
+		private boolean hasHelpString() {
+			return this.help != null;
+		}
+
 	}
 
 	public static class Configuration {
 		public static boolean cli = false;
+		public static boolean help = false;
 	}
 
 	public static final Logger LOG = Logger.getLogger("lory");
 
 	private static final Option[] options = new Option[] {
 			new Option("--cli", "Runs lory in CLI mode.", () -> Configuration.cli = true),
-			new Option("--help", "TODO", () -> System.out.println("Help")) };
+			new Option("--help", () -> Configuration.help = true) };
 
 	private static Option getOption(String s) {
 		for (Option option : options) {
@@ -45,61 +52,43 @@ public class Lory {
 	}
 
 	private static boolean parseArg(String[] args) {
-		// TODO
+		for (int i = 0; i < args.length; i++) {
+			Option option = getOption(args[i]);
+			if (option == null) {
+				return false;
+			}
+			option.executeAction();
+		}
 		return true;
 	}
 
-	public static void main(String[] args) {
-		if (true) {
-			Shell a = new Shell();
-			a.go();
-			return;
-		}
-		ServerDescription des = new ServerDescription("Freenode", "irc.freenode.net", 6667);
-		Server a = new Server(new ServerConnection(des));
-		try {
-			a.connect();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		while (!a.isConnected())
-			;
-
-		try {
-			a.sendMessage(new MsgDbg("NICK testtet2222"));
-			a.sendMessage(new MsgDbg("USER testtest2222 192.33.22.22 irc.freenode.net :Some Guy"));
-
-			for (int i = 0; i < 1000; i++) {
-				a.sendMessage(null);
+	private static void dumpHelp() {
+		System.out.println("Lory - An IRC Client\n");
+		for (Option s : options) {
+			System.out.print(s.name);
+			if (s.hasHelpString()) {
+				System.out.print("\t" + s.help);
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		while (a.isConnected()) { /* Yay */
+			System.out.println();
 		}
 	}
 
-	private static class MsgDbg implements IMessage {
+	public static void launchCliMode() {
+		new Shell().go();
+	}
 
-		private String mg;
+	public static void main(String[] args) {
+		boolean parseArgSuccess = parseArg(args);
 
-		public MsgDbg(String mg) {
-			this.mg = mg;
+		if (Configuration.help || !parseArgSuccess) {
+			dumpHelp();
+			return;
 		}
 
-		@Override
-		public EMessageType getMessageType() {
-			// TODO Auto-generated method stub
-			return null;
+		if (Configuration.cli) {
+			launchCliMode();
+		} else {
+			System.out.println("GUI not yet supported.");
 		}
-
-		@Override
-		public String getMessage() {
-			return mg;
-		}
-
 	}
 }
