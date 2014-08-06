@@ -155,7 +155,7 @@ public class Shell {
 
 						@Override
 						public String getMessage() {
-							return "JOIN ##proggit";
+							return "JOIN ##dbgchannel";
 						}
 					});
 

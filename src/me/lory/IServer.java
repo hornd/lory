@@ -43,6 +43,22 @@ public interface IServer extends IServerMessageDispatcher {
 	Collection<IConversation> getConversations();
 
 	/**
+	 * Create a new conversation belonging to this server. A conversation can be
+	 * created either via an incoming message with an unknown sender, or a user
+	 * command such as /join, /query or /msg.
+	 * 
+	 * @param name
+	 * @return
+	 */
+	IConversation openConversation(String name);
+	
+	/**
+	 * Close a conversation.
+	 * @param conversation
+	 */
+	void closeConversation(IConversation conversation);
+
+	/**
 	 * Return the status conversation associated with this server.
 	 * 
 	 * @return

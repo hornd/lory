@@ -34,7 +34,10 @@ import me.lory.irc.internal.ISocketWriter;
 
 public class Server implements IServer {
 	private final IServerConnection connection;
+	// Should conversations be handled elsewhere?
 	private final List<IConversation> conversations;
+	private final ConversationFactory factory;
+	
 	private IConversation status;
 
 	private ExecutorService egressPoll;
@@ -47,6 +50,7 @@ public class Server implements IServer {
 
 		this.conversations = Collections.synchronizedList(new ArrayList<IConversation>());
 		this.clientToServer = new ConcurrentLinkedQueue<IMessage>();
+		this.factory = new ConversationFactory(this);
 	}
 
 	@Override
@@ -56,9 +60,7 @@ public class Server implements IServer {
 
 		this.connection.connect();
 
-		IConversation statusConvo = new Conversation("Status", true);
-		statusConvo.setDispatcher(this);
-		this.status = statusConvo;
+		this.status = this.factory.createStatusConversation();
 
 		this.egressPoll.execute(new EgressProcessor(this.connection));
 		this.ingressPoll.execute(new IngressProcessor(this.connection));
@@ -86,9 +88,16 @@ public class Server implements IServer {
 		return new ArrayList<IConversation>(this.conversations);
 	}
 
-	void addConversation(IConversation conversation) {
-		// attach dispatcher
-		// add to list.
+	@Override
+	public IConversation openConversation(String name) {
+		IConversation convo = this.factory.createConversation(name);
+		this.conversations.add(convo);
+		return convo;
+	}
+
+	@Override
+	public void closeConversation(IConversation conversation) {
+		this.conversations.remove(conversation);
 	}
 
 	@Override
