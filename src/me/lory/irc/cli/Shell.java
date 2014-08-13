@@ -1,7 +1,6 @@
 package me.lory.irc.cli;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.List;
@@ -21,9 +20,10 @@ import me.lory.irc.Server;
 import me.lory.irc.ServerConnection;
 import me.lory.irc.ServerDescription;
 import me.lory.irc.User;
+import me.lory.irc.cli.IControlHandler.IllegalServerStateException;
 import me.lory.irc.internal.IServerConnection;
 
-public class Shell {
+public class Shell implements IShell {
 
 	private IServer server;
 	private IConversation activeConversation;
@@ -48,17 +48,13 @@ public class Shell {
 	private Map<EControlMessage, IControlHandler> inputHandlers = new HashMap<EControlMessage, IControlHandler>();
 	{
 		inputHandlers.put(EControlMessage.CONNECT, new ConnectHandle());
-		inputHandlers.put(EControlMessage.NICK, new NickHandle());
-		inputHandlers.put(EControlMessage.LIST, new ListHandle());
+		inputHandlers.put(EControlMessage.NICK, new NickHandle(this));
+		inputHandlers.put(EControlMessage.LIST, new ListHandle(this));
 	}
 
 	private Map<EMessageType, IControlHandler> outputHandlers = new HashMap<EMessageType, IControlHandler>();
 	{
-		outputHandlers.put(EMessageType.PING, new PingHandle());
-	}
-
-	private interface IControlHandler {
-		void handle(String fullMsg);
+		outputHandlers.put(EMessageType.PING, new PingHandle(this));
 	}
 
 	public Shell() {
@@ -74,17 +70,48 @@ public class Shell {
 		System.out.println("*********************************************");
 		System.out.println("Lory (CLI mode)");
 		System.out.println("*********************************************\n");
-		
+
 		try (Scanner s = new Scanner(System.in)) {
 			while (true) {
 				String n = s.nextLine();
 				IControlHandler handler = this.inputHandlers.get(EControlMessage.getMessageType(n));
 				if (handler != null) {
-					handler.handle(n);
+					try {
+						handler.handle(n);
+					} catch (IllegalArgumentException e) {
+						// Print help message.
+					} catch (IllegalServerStateException e) {
+						Lory.LOG.log(Level.SEVERE, "Not connected to server!");
+					}
 				} else if (this.activeConversation != null) {
 					this.activeConversation.send(EMessageType.PRIVMSG, n);
 				}
 			}
+		}
+	}
+
+	/** TODO: These need synchronization (visbility) */
+	@Override
+	public IServer getServer() {
+		return this.server;
+	}
+
+	@Override
+	public IConversation getStatusConversation() {
+		return this.statusConversation;
+	}
+
+	@Override
+	public IConversation getActiveConversation() {
+		return this.activeConversation;
+	}
+
+	@Override
+	public void setUser(User user) {
+		this.user = user;
+		if (this.server != null && this.server.isConnected()) {
+			Shell.this.activeConversation.send(EMessageType.USER, Shell.this.user.getRealName()
+					+ " 192.33.22.22 irc.freenode.net :TODO");
 		}
 	}
 
@@ -95,46 +122,18 @@ public class Shell {
 				for (IMessage msg : Shell.this.statusConversation.getRecent()) {
 					IControlHandler handle = Shell.this.outputHandlers.get(msg.getMessageType());
 					if (handle != null) {
-						handle.handle(msg.getMessage());
+						try {
+							handle.handle(msg.getMessage());
+						} catch (IllegalArgumentException|IllegalServerStateException e) {
+							// TODO: Probably indicates a bug in handler...
+							Lory.LOG.log(Level.SEVERE, e.getMessage());
+						}
 					} else {
 						synchronized (Shell.this.statusBackup) {
 							Shell.this.statusBackup.add(msg);
 						}
 					}
 				}
-			}
-		}
-	}
-
-	private final class ListHandle implements IControlHandler {
-		@Override
-		public void handle(String fullMsg) {
-			System.out.println("You are currently in: ");
-			Collection<IConversation> convos = Shell.this.server.getConversations();
-
-			int i = 0;
-			for (IConversation convo : convos) {
-				System.out.println(String.format("(%d) %s", i++, convo.getName()));
-			}
-		}
-	}
-
-	private final class PingHandle implements IControlHandler {
-		@Override
-		public void handle(String fullMsg) {
-			Shell.this.statusConversation.send(EMessageType.PONG, "PONG");
-		}
-	}
-
-	private final class NickHandle implements IControlHandler {
-		@Override
-		public void handle(String fullMsg) {
-			String[] args = fullMsg.split(" ");
-			String nick = args[1];
-			Shell.this.user = new User(nick, "Soe dude");
-			if (Shell.this.server != null && Shell.this.server.isConnected()) {
-				Shell.this.activeConversation.send(EMessageType.USER, Shell.this.user.getRealName()
-						+ " 192.33.22.22 irc.freenode.net :TODO");
 			}
 		}
 	}

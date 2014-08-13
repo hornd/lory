@@ -18,7 +18,7 @@ public class TestRawMessage {
         String userMssage = ":anotherUser!alias@unaffiliated/omehtin/x-4957395 PRIVMSG someUser :this is a test message";
         RawMessage parts = RawMessage.create(userMssage);
         assertTrue(parts.hasPrefix());
-        assertEquals(":anotherUser!alias@unaffiliated/omehtin/x-4957395", parts.getPrefix());
+        assertEquals("anotherUser!alias@unaffiliated/omehtin/x-4957395", parts.getPrefix());
         assertEquals("PRIVMSG", parts.getCommand());
         assertArrayEquals(new String[] { "someUser", "this is a test message" }, parts.getParams());
     }

@@ -1,0 +1,6 @@
+- test debt
+- null checks to handlers
+- synchronization in Shell for conversation access
+- better system for cli display 
+- implement switching of active conversation
+- bindings for ease of gui addition
