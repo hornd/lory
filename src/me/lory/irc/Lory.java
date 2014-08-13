@@ -1,5 +1,6 @@
 package me.lory.irc;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import me.lory.irc.cli.Shell;
@@ -37,6 +38,9 @@ public class Lory {
 	}
 
 	public static final Logger LOG = Logger.getLogger("lory");
+	static {
+		LOG.setLevel(Level.FINE);
+	}
 
 	private static final Option[] options = new Option[] {
 			new Option("--cli", "Runs lory in CLI mode.", () -> Configuration.cli = true),

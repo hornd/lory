@@ -51,6 +51,7 @@ public class Conversation implements IConversation {
 		Collection<IMessage> ret = new ArrayList<IMessage>();
 		synchronized (this.mailbox) {
 			ret.addAll(this.mailbox);
+			this.mailbox.clear();
 		}
 		return ret;
 	}

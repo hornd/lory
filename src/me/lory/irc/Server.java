@@ -91,6 +91,7 @@ public class Server implements IServer {
 
 	@Override
 	public IConversation openConversation(String name) {
+		Lory.LOG.log(Level.FINE, String.format("Opening conversation: %s", name));
 		IConversation convo = this.factory.createConversation(name);
 		this.conversations.add(convo);
 		return convo;
@@ -152,12 +153,17 @@ public class Server implements IServer {
 				if (rec != null) {
 					try {
 						IRawMessage rawMsg = RawMessage.create(rec);
-						@SuppressWarnings("unused")
-						IMessage msg = IngressMessageCompiler.compile(rawMsg);
 
-						// TODO: find target, queue message.
-						throw new MessageParserException("a");
-						// target.queueReceived(message);
+						IMessage msg = IngressMessageCompiler.compile(rawMsg);
+						IConversation convo = this.getConversationForIngressMsg(msg);
+
+						if (convo == null) {
+							convo = Server.this.openConversation(msg.getTarget());
+						}
+						
+						Lory.LOG.log(Level.FINE, String.format("Queuing %s on %s", msg, convo.getName()));
+
+						convo.queueReceived(msg);
 					} catch (MessageParserException e) {
 						Lory.LOG.log(Level.SEVERE, String.format("Unrecognized message! %s", rec));
 					}
@@ -166,8 +172,22 @@ public class Server implements IServer {
 		}
 
 		@SuppressWarnings("unused")
-		public IConversation getConversationForIngressMsg(String msg) {
-			return Server.this.status;
+		public IConversation getConversationForIngressMsg(IMessage msg) {
+			IConversation ret = null;
+			List<IConversation> convos = new ArrayList<IConversation>(Server.this.conversations);
+			for (IConversation convo : convos) {
+				if (convo.getName().equals(msg.getTarget())) {
+					ret = convo;
+					break;
+				}
+			}
+
+			// TODO
+			if (msg.getTarget().equals("(status)")) {
+				ret = Server.this.status;
+			}
+
+			return ret;
 		}
 	}
 }

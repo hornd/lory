@@ -16,14 +16,17 @@ public class ConversationFactory {
 		this.server = server;
 	}
 
-	public synchronized IConversation createStatusConversation() {
-		IConversation ret = new Conversation("Status", true);
-		ret.setDispatcher(this.server);
-		return ret;
+	public IConversation createStatusConversation() {
+		return this.create("Status", true);
 	}
 
-	// TODO.
-	public synchronized IConversation createConversation(String name) {
-		throw new UnsupportedOperationException();
+	public IConversation createConversation(String name) {
+		return this.create(name, false);
+	}
+	
+	private IConversation create(String name, boolean isStatus) {
+		IConversation ret = new Conversation(name, isStatus);
+		ret.setDispatcher(this.server);
+		return ret;
 	}
 }

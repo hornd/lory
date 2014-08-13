@@ -8,7 +8,7 @@ public class IngressMessageCompiler {
 	public static IMessage compile(IRawMessage raw) {
 		EMessageType type = getMessageType(raw);
 		if (type != EMessageType.PRIVMSG) {
-			return new IngressMessage(type, "UNKOWN", raw.getMessage());
+			return new IngressMessage(type, "(status)", raw.getMessage());
 		}
 
 		String target = getTarget(raw);
