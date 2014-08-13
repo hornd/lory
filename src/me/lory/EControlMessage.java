@@ -8,7 +8,7 @@ package me.lory;
  *
  */
 public enum EControlMessage {
-	CONNECT("/connect"), DISCONNECT("/disconnect"), JOIN("/join"), NICK("/nick");
+	CONNECT("/connect"), DISCONNECT("/disconnect"), JOIN("/join"), NICK("/nick"), LIST("/list");
 
 	private String messagePrefix;
 

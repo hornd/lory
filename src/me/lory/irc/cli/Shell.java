@@ -1,7 +1,10 @@
 package me.lory.irc.cli;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -29,6 +32,15 @@ public class Shell {
 	 * PING, CTCP etc.
 	 */
 	private IConversation statusConversation;
+
+	/**
+	 * The ShellOut class continuously polls the status connection to handle
+	 * interactions, but this clears any {@link IMessage} objects that should
+	 * just be displayed. We can hackily maintain a cache of them here, to be
+	 * replayed when the activeConversation is set to status.
+	 */
+	private List<IMessage> statusBackup;
+
 	private User user;
 
 	private final ExecutorService exec = Executors.newFixedThreadPool(1);
@@ -37,6 +49,7 @@ public class Shell {
 	{
 		inputHandlers.put(EControlMessage.CONNECT, new ConnectHandle());
 		inputHandlers.put(EControlMessage.NICK, new NickHandle());
+		inputHandlers.put(EControlMessage.LIST, new ListHandle());
 	}
 
 	private Map<EMessageType, IControlHandler> outputHandlers = new HashMap<EMessageType, IControlHandler>();
@@ -53,10 +66,15 @@ public class Shell {
 		this.user = null;
 		this.activeConversation = null;
 		this.statusConversation = null;
+
+		this.statusBackup = new ArrayList<IMessage>();
 	}
 
 	public void go() {
-		System.out.println("Lory cli");
+		System.out.println("*********************************************");
+		System.out.println("Lory (CLI mode)");
+		System.out.println("*********************************************\n");
+		
 		try (Scanner s = new Scanner(System.in)) {
 			while (true) {
 				String n = s.nextLine();
@@ -79,21 +97,36 @@ public class Shell {
 					if (handle != null) {
 						handle.handle(msg.getMessage());
 					} else {
-						System.out.println(msg.getMessage());
+						synchronized (Shell.this.statusBackup) {
+							Shell.this.statusBackup.add(msg);
+						}
 					}
 				}
 			}
 		}
 	}
 
-	private class PingHandle implements IControlHandler {
+	private final class ListHandle implements IControlHandler {
+		@Override
+		public void handle(String fullMsg) {
+			System.out.println("You are currently in: ");
+			Collection<IConversation> convos = Shell.this.server.getConversations();
+
+			int i = 0;
+			for (IConversation convo : convos) {
+				System.out.println(String.format("(%d) %s", i++, convo.getName()));
+			}
+		}
+	}
+
+	private final class PingHandle implements IControlHandler {
 		@Override
 		public void handle(String fullMsg) {
 			Shell.this.statusConversation.send(EMessageType.PONG, "PONG");
 		}
 	}
 
-	private class NickHandle implements IControlHandler {
+	private final class NickHandle implements IControlHandler {
 		@Override
 		public void handle(String fullMsg) {
 			String[] args = fullMsg.split(" ");
@@ -106,7 +139,7 @@ public class Shell {
 		}
 	}
 
-	private class ConnectHandle implements IControlHandler {
+	private final class ConnectHandle implements IControlHandler {
 		@Override
 		public void handle(String fullMsg) {
 			if (user == null) {

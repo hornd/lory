@@ -22,17 +22,16 @@ import me.lory.irc.message.IngressMessageCompiler;
 import me.lory.irc.message.MessageParserException;
 import me.lory.irc.message.RawMessage;
 
-/* Ingress Message format:
+/**
+ * Implements the IServer interface describing a connection to an IRC server.
  * 
- :cameron.freenode.net 376 testtest2222 :End of /MOTD command.
- :testtest2222 MODE testtest2222 :+i
- :cameron.freenode.net 462 testtest2222 :You may not reregister
- PING :cameron.freenode.net
- :synx!hornd@unaffiliated/synx/x-4957395 PRIVMSG testtest2222 :sup
-
+ * A server is made up of a socket connection and a list of {@link IConversation}s. This
+ * implementation uses two separate {@link ExecutorService}s to poll for incoming and outgoing
+ * messages.
  * 
+ * @author hornd
+ *
  */
-
 public class Server implements IServer {
 	private final IServerConnection connection;
 	// Should conversations be handled elsewhere?
@@ -160,7 +159,7 @@ public class Server implements IServer {
 						if (convo == null) {
 							convo = Server.this.openConversation(msg.getTarget());
 						}
-						
+
 						Lory.LOG.log(Level.FINE, String.format("Queuing %s on %s", msg, convo.getName()));
 
 						convo.queueReceived(msg);
@@ -171,7 +170,6 @@ public class Server implements IServer {
 			}
 		}
 
-		@SuppressWarnings("unused")
 		public IConversation getConversationForIngressMsg(IMessage msg) {
 			IConversation ret = null;
 			List<IConversation> convos = new ArrayList<IConversation>(Server.this.conversations);
