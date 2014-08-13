@@ -11,15 +11,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 
-import me.lory.EMessageType;
 import me.lory.IConversation;
 import me.lory.IMessage;
-import me.lory.IMessage.MessageBuilderException;
+import me.lory.IRawMessage;
 import me.lory.IServer;
-import me.lory.irc.IngressMessageParser.MessageParserException;
 import me.lory.irc.internal.IServerConnection;
 import me.lory.irc.internal.ISocketReader;
 import me.lory.irc.internal.ISocketWriter;
+import me.lory.irc.message.IngressMessageCompiler;
+import me.lory.irc.message.MessageParserException;
+import me.lory.irc.message.RawMessage;
 
 /* Ingress Message format:
  * 
@@ -150,19 +151,14 @@ public class Server implements IServer {
 
 				if (rec != null) {
 					try {
-						IngressMessageParser parser = new IngressMessageParser(rec);
-						EMessageType type = parser.getType();
-						IConversation target = parser.getTarget(Server.this.conversations, type);
-						if (target == null) {
-							// TODO: Spawn new conversation.
-						}
-
-						String strMsg = parser.getMessage(type);
-						IMessage message = new Message.Builder().setMessageType(type).setTarget(target)
-								.setMessage(strMsg).build();
-
-						target.queueReceived(message);
-					} catch (MessageParserException | MessageBuilderException e) {
+					    IRawMessage rawMsg = RawMessage.create(rec);
+					    @SuppressWarnings("unused")
+					    IMessage msg = IngressMessageCompiler.compile(rawMsg);
+					  
+					    // TODO: find target, queue message.
+					    throw new MessageParserException("a");
+						//target.queueReceived(message);
+					} catch (MessageParserException e) {
 						Lory.LOG.log(Level.SEVERE, String.format("Unrecognized message! %s", rec));
 					}
 				}
