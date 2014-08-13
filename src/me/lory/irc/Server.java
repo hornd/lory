@@ -38,7 +38,7 @@ public class Server implements IServer {
 	// Should conversations be handled elsewhere?
 	private final List<IConversation> conversations;
 	private final ConversationFactory factory;
-	
+
 	private IConversation status;
 
 	private ExecutorService egressPoll;
@@ -151,13 +151,13 @@ public class Server implements IServer {
 
 				if (rec != null) {
 					try {
-					    IRawMessage rawMsg = RawMessage.create(rec);
-					    @SuppressWarnings("unused")
-					    IMessage msg = IngressMessageCompiler.compile(rawMsg);
-					  
-					    // TODO: find target, queue message.
-					    throw new MessageParserException("a");
-						//target.queueReceived(message);
+						IRawMessage rawMsg = RawMessage.create(rec);
+						@SuppressWarnings("unused")
+						IMessage msg = IngressMessageCompiler.compile(rawMsg);
+
+						// TODO: find target, queue message.
+						throw new MessageParserException("a");
+						// target.queueReceived(message);
 					} catch (MessageParserException e) {
 						Lory.LOG.log(Level.SEVERE, String.format("Unrecognized message! %s", rec));
 					}

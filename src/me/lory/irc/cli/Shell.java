@@ -123,7 +123,7 @@ public class Shell {
                 IServerConnection con = new ServerConnection(desc);
 
                 if (Shell.this.server != null) {
-                    try {
+					try {
                         Shell.this.server.disconnect();
                     } catch (Exception e) {
                         e.printStackTrace();

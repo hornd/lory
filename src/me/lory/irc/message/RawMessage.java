@@ -18,100 +18,100 @@ import me.lory.IRawMessage;
  *
  */
 public final class RawMessage implements IRawMessage {
-    private static final String PREFIX_PARAM_INDICATOR = ":";
+	private static final String PREFIX_PARAM_INDICATOR = ":";
 
-    private final String raw;
-    private final String prefix;
-    private final String command;
-    private final String[] params;
+	private final String raw;
+	private final String prefix;
+	private final String command;
+	private final String[] params;
 
-    private RawMessage(final String message) throws MessageParserException {
-        String[] parts = message.split(" ");
-        if (parts.length < 2) {
-            throw new MessageParserException("Invalid message format.");
-        }
+	private RawMessage(final String message) throws MessageParserException {
+		String[] parts = message.split(" ");
+		if (parts.length < 2) {
+			throw new MessageParserException("Invalid message format.");
+		}
 
-        boolean hasPrefix = parts[0].startsWith(PREFIX_PARAM_INDICATOR);
-        int commandIdx = hasPrefix ? 1 : 0;
-        
-        this.raw = message;
-        this.prefix = hasPrefix ? parts[0].substring(1) : null;
-        this.command = parts[commandIdx];
-        this.params = this.getCoalescedParams(Arrays.copyOfRange(parts, commandIdx + 1, parts.length));
-    }
+		boolean hasPrefix = parts[0].startsWith(PREFIX_PARAM_INDICATOR);
+		int commandIdx = hasPrefix ? 1 : 0;
 
-    /**
-     * Coalesce parameters that include a trailing by turning the trailing into
-     * a single string param.
-     * 
-     * @param params
-     * @return
-     */
-    private String[] getCoalescedParams(String[] params) {
-        int trailIdx = this.getTrailingIndex(params);
-        if (trailIdx < 0) {
-            return params;
-        }
+		this.raw = message;
+		this.prefix = hasPrefix ? parts[0].substring(1) : null;
+		this.command = parts[commandIdx];
+		this.params = this.getCoalescedParams(Arrays.copyOfRange(parts, commandIdx + 1, parts.length));
+	}
 
-        StringBuilder comb = new StringBuilder();
-        comb.append(params[trailIdx].substring(1));
-        for (int i = trailIdx + 1; i < params.length; i++) {
-            comb.append(" ");
-            comb.append(params[i]);
-        }
+	/**
+	 * Coalesce parameters that include a trailing by turning the trailing into
+	 * a single string param.
+	 * 
+	 * @param params
+	 * @return
+	 */
+	private String[] getCoalescedParams(String[] params) {
+		int trailIdx = this.getTrailingIndex(params);
+		if (trailIdx < 0) {
+			return params;
+		}
 
-        String[] ret = new String[trailIdx + 1];
-        for (int i = 0; i < trailIdx; i++) {
-            ret[i] = params[i];
-        }
+		StringBuilder comb = new StringBuilder();
+		comb.append(params[trailIdx].substring(1));
+		for (int i = trailIdx + 1; i < params.length; i++) {
+			comb.append(" ");
+			comb.append(params[i]);
+		}
 
-        ret[trailIdx] = comb.toString();
-        return ret;
-    }
+		String[] ret = new String[trailIdx + 1];
+		for (int i = 0; i < trailIdx; i++) {
+			ret[i] = params[i];
+		}
 
-    private int getTrailingIndex(String[] params) {
-        int trailIdx = -1;
-        for (int i = 0; i < params.length; i++) {
-            if (params[i].startsWith(PREFIX_PARAM_INDICATOR)) {
-                trailIdx = i;
-                break;
-            }
-        }
+		ret[trailIdx] = comb.toString();
+		return ret;
+	}
 
-        return trailIdx;
-    }
+	private int getTrailingIndex(String[] params) {
+		int trailIdx = -1;
+		for (int i = 0; i < params.length; i++) {
+			if (params[i].startsWith(PREFIX_PARAM_INDICATOR)) {
+				trailIdx = i;
+				break;
+			}
+		}
 
-    public static RawMessage create(String message) throws MessageParserException {
-        return new RawMessage(message);
-    }
+		return trailIdx;
+	}
 
-    @Override
-    public String getMessage() {
-        return this.raw;
-    }
-    
-    @Override
-    public String getPrefix() {
-        return this.prefix;
-    }
+	public static RawMessage create(String message) throws MessageParserException {
+		return new RawMessage(message);
+	}
 
-    @Override
-    public String getCommand() {
-        return this.command;
-    }
+	@Override
+	public String getMessage() {
+		return this.raw;
+	}
 
-    @Override
-    public String[] getParams() {
-        return this.params.clone();
-    }
+	@Override
+	public String getPrefix() {
+		return this.prefix;
+	}
 
-    @Override
-    public boolean hasPrefix() {
-        return this.getPrefix() != null;
-    }
+	@Override
+	public String getCommand() {
+		return this.command;
+	}
 
-    @Override
-    public IMessage compile() {
-        return IngressMessageCompiler.compile(this);
-    }
+	@Override
+	public String[] getParams() {
+		return this.params.clone();
+	}
+
+	@Override
+	public boolean hasPrefix() {
+		return this.getPrefix() != null;
+	}
+
+	@Override
+	public IMessage compile() {
+		return IngressMessageCompiler.compile(this);
+	}
 }

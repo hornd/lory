@@ -1,6 +1,5 @@
 package me.lory.irc;
 
-
 /**
  * Describes a server.
  * 

@@ -51,9 +51,10 @@ public interface IServer extends IServerMessageDispatcher {
 	 * @return
 	 */
 	IConversation openConversation(String name);
-	
+
 	/**
 	 * Close a conversation.
+	 * 
 	 * @param conversation
 	 */
 	void closeConversation(IConversation conversation);
