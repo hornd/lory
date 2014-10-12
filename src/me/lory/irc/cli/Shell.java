@@ -90,19 +90,18 @@ public class Shell implements IShell {
 		}
 	}
 
-	/** TODO: These need synchronization (visbility) */
 	@Override
-	public IServer getServer() {
+	public synchronized IServer getServer() {
 		return this.server;
 	}
 
 	@Override
-	public IConversation getStatusConversation() {
+	public synchronized IConversation getStatusConversation() {
 		return this.statusConversation;
 	}
 
 	@Override
-	public IConversation getActiveConversation() {
+	public synchronized IConversation getActiveConversation() {
 		return this.activeConversation;
 	}
 

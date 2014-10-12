@@ -1,5 +1,9 @@
 package me.lory.irc;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +36,7 @@ public class Lory {
 
 	}
 
-	public static class Configuration {
+	public static class Flags {
 		public static boolean cli = false;
 		public static boolean help = false;
 	}
@@ -43,8 +47,8 @@ public class Lory {
 	}
 
 	private static final Option[] options = new Option[] {
-			new Option("--cli", "Runs lory in CLI mode.", () -> Configuration.cli = true),
-			new Option("--help", () -> Configuration.help = true) };
+			new Option("--cli", "Runs lory in CLI mode.", () -> Flags.cli = true),
+			new Option("--help", () -> Flags.help = true) };
 
 	private static Option getOption(String s) {
 		for (Option option : options) {
@@ -82,17 +86,40 @@ public class Lory {
 	}
 
 	public static void main(String[] args) {
+	    Configuration config = getConfiguration();
 		boolean parseArgSuccess = parseArg(args);
 
-		if (Configuration.help || !parseArgSuccess) {
+		if (Flags.help || !parseArgSuccess) {
 			dumpHelp();
 			return;
 		}
 
-		if (Configuration.cli) {
+		if (Flags.cli) {
 			launchCliMode();
 		} else {
 			System.out.println("GUI not yet supported.");
 		}
+	}
+	
+	private static Configuration getConfiguration() {
+	    Configuration config = null;
+	    try {
+            File configFile = getConfigFile();
+            BufferedReader reader = new BufferedReader(new FileReader(configFile));
+            Configuration.Parser parser = new Configuration.Parser(reader);
+            config = parser.parse();
+        } catch (IOException|SecurityException e) {
+            LOG.log(Level.WARNING, "Error reading configuration file.");
+        }
+	    
+	    return config;
+	}
+	
+	private static File getConfigFile() throws IOException, SecurityException {
+	    File f = new File(System.getProperty("user.home") + File.separator + ".lory" + File.separator + "lory.conf");
+	    if (!f.exists()) {
+	        f.createNewFile();
+	    }
+	    return f;
 	}
 }
