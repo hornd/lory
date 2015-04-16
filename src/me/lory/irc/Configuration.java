@@ -91,7 +91,7 @@ public final class Configuration {
             List<String> seen = new ArrayList<>();
             while ((line = this.config.readLine()) != null) {
                 Matcher m = pattern.matcher(line);
-                if (!m.matches() || m.groupCount() != 2) {
+                if (!m.matches()) {
                     Lory.LOG.log(Level.WARNING, String.format("Skipping invalid configuration: %s", line));
                     continue;
                 }

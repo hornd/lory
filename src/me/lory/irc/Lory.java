@@ -104,7 +104,7 @@ public class Lory {
 	private static Configuration getConfiguration() {
 	    Configuration config = null;
 	    try {
-            File configFile = getConfigFile();
+            File configFile = FileUtil.getOrCreateUserConfigFile();
             BufferedReader reader = new BufferedReader(new FileReader(configFile));
             Configuration.Parser parser = new Configuration.Parser(reader);
             config = parser.parse();
@@ -113,13 +113,5 @@ public class Lory {
         }
 	    
 	    return config;
-	}
-	
-	private static File getConfigFile() throws IOException, SecurityException {
-	    File f = new File(System.getProperty("user.home") + File.separator + ".lory" + File.separator + "lory.conf");
-	    if (!f.exists()) {
-	        f.createNewFile();
-	    }
-	    return f;
 	}
 }

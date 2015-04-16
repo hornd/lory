@@ -3,6 +3,7 @@ package me.lory.irc;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Observable;
 
 import me.lory.EMessageType;
 import me.lory.IConversation;
